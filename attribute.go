@@ -53,38 +53,27 @@ func AttrVal(body string, attrKey string, opts ...AttrValOptFunc) (val string, e
 	for _, opt := range opts {
 		opt(defaultOpts)
 	}
-	tkn := html.NewTokenizer(strings.NewReader(body))
-	for {
-		tt := tkn.Next()
-		switch tt {
-		case html.ErrorToken:
-			err = fmt.Errorf("failed to find matching token with attr: %s", attrKey)
-			return
-		case html.StartTagToken:
-			token := tkn.Token()
-			if !attrValTokenCheck(token, defaultOpts) {
-				continue
-			}
-			for _, attr := range token.Attr {
-				if attr.Key == attrKey {
-					val = attr.Val
-					return
-				}
-			}
-		}
+	vals := parseAttrVal(html.NewTokenizer(strings.NewReader(body)), attrKey, defaultOpts)
+	if len(vals) == 0 {
+		return "", fmt.Errorf("no value found for attribute '%s'", attrKey)
 	}
+	val = vals[0]
+	return
 }
 
 func AttrVals(body string, attrKey string, opts ...AttrValOptFunc) (vals []string) {
-	var (
-		prevToken   *html.Token = nil
-		checkText   bool        = false
-		defaultOpts             = DefaultAttrValOpts()
-	)
+	defaultOpts := DefaultAttrValOpts()
 	for _, opt := range opts {
 		opt(defaultOpts)
 	}
-	tkn := html.NewTokenizer(strings.NewReader(body))
+	return parseAttrVal(html.NewTokenizer(strings.NewReader(body)), attrKey, defaultOpts)
+}
+
+func parseAttrVal(tkn *html.Tokenizer, attrKey string, opts *AttrValOpts) (vals []string) {
+	var (
+		prevToken *html.Token = nil
+		checkText bool        = false
+	)
 	for {
 		tt := tkn.Next()
 		switch tt {
@@ -92,10 +81,10 @@ func AttrVals(body string, attrKey string, opts ...AttrValOptFunc) (vals []strin
 			return
 		case html.StartTagToken:
 			token := tkn.Token()
-			if !attrValTokenCheck(token, defaultOpts) {
+			if !attrValTokenCheck(token, opts) {
 				continue
 			}
-			if defaultOpts.innerHtml != "" || defaultOpts.innerHtmlRegex != nil {
+			if opts.innerHtml != "" || opts.innerHtmlRegex != nil {
 				checkText = true
 				prevToken = &token
 				continue
@@ -110,7 +99,7 @@ func AttrVals(body string, attrKey string, opts ...AttrValOptFunc) (vals []strin
 				continue
 			}
 			token := tkn.Token()
-			if !attrValTextCheck(token, defaultOpts) {
+			if !attrValTextCheck(token, opts) {
 				continue
 			}
 			for _, attr := range prevToken.Attr {
