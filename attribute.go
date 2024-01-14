@@ -76,7 +76,11 @@ func AttrVal(body string, attrKey string, opts ...AttrValOptFunc) (val string, e
 }
 
 func AttrVals(body string, attrKey string, opts ...AttrValOptFunc) (vals []string) {
-	defaultOpts := DefaultAttrValOpts()
+	var (
+		prevToken   *html.Token = nil
+		checkText   bool        = false
+		defaultOpts             = DefaultAttrValOpts()
+	)
 	for _, opt := range opts {
 		opt(defaultOpts)
 	}
@@ -91,12 +95,32 @@ func AttrVals(body string, attrKey string, opts ...AttrValOptFunc) (vals []strin
 			if !attrValTokenCheck(token, defaultOpts) {
 				continue
 			}
+			if defaultOpts.innerHtml != "" || defaultOpts.innerHtmlRegex != nil {
+				checkText = true
+				prevToken = &token
+				continue
+			}
 			for _, attr := range token.Attr {
 				if attr.Key == attrKey {
 					vals = append(vals, attr.Val)
 				}
 			}
+		case html.TextToken:
+			if !checkText || prevToken == nil {
+				continue
+			}
+			token := tkn.Token()
+			if !attrValTextCheck(token, defaultOpts) {
+				continue
+			}
+			for _, attr := range prevToken.Attr {
+				if attr.Key == attrKey {
+					vals = append(vals, attr.Val)
+				}
+			}
 		}
+		checkText = false
+		prevToken = nil
 	}
 }
 
@@ -107,6 +131,10 @@ func attrValTokenCheck(token html.Token, opts *AttrValOpts) bool {
 	if opts.attrs != nil && !HasAttributes(token, opts.attrs) {
 		return false
 	}
+	return true
+}
+
+func attrValTextCheck(token html.Token, opts *AttrValOpts) bool {
 	if opts.innerHtml != "" && token.Data != opts.innerHtml {
 		return false
 	}

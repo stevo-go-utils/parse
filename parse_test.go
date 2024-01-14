@@ -3,6 +3,7 @@ package parse_test
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/stevo-go-utils/parse"
@@ -40,4 +41,12 @@ func TestAttrVals(t *testing.T) {
 
 func TestAttrValOpts(t *testing.T) {
 	// add in test cases here for the various options
+	pattern, err := regexp.Compile(`^Bulba*`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	vals := parse.AttrVals(htmlInput, "href", parse.AttrValTagNameOpt("a"), parse.InnerHtmlRegexOpt(pattern))
+	if len(vals) != 12 {
+		t.Fatalf("expected 12 urls, got %d", len(vals))
+	}
 }
