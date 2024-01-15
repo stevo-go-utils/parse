@@ -1,24 +1,11 @@
 package parse_test
 
 import (
-	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
 	"github.com/stevo-go-utils/parse"
 )
-
-var htmlInput string
-
-func init() {
-	data, err := os.ReadFile("./axew.html")
-	if err != nil {
-		fmt.Println("failed to load html input form 'axew.html'")
-		panic(err)
-	}
-	htmlInput = string(data)
-}
 
 func TestAttrVal(t *testing.T) {
 	// find first <a> tag element with href attribute and return the href value
@@ -45,7 +32,7 @@ func TestAttrValOpts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	vals := parse.AttrVals(htmlInput, "href", parse.AttrValTagNameOpt("a"), parse.InnerHtmlRegexOpt(pattern))
+	vals := parse.AttrVals(htmlInput, "href", parse.AttrValTagNameOpt("a"), parse.InnerHtmlRegexAttrOpt(pattern))
 	if len(vals) != 12 {
 		t.Fatalf("expected 12 urls, got %d", len(vals))
 	}

@@ -36,13 +36,13 @@ func AttrValAttrsOpt(attrs []html.Attribute) AttrValOptFunc {
 	}
 }
 
-func InnerHtmlOpt(innerHtml string) AttrValOptFunc {
+func InnerHtmlAttrOpt(innerHtml string) AttrValOptFunc {
 	return func(opts *AttrValOpts) {
 		opts.innerHtml = innerHtml
 	}
 }
 
-func InnerHtmlRegexOpt(innerHtmlRegex *regexp.Regexp) AttrValOptFunc {
+func InnerHtmlRegexAttrOpt(innerHtmlRegex *regexp.Regexp) AttrValOptFunc {
 	return func(opts *AttrValOpts) {
 		opts.innerHtmlRegex = innerHtmlRegex
 	}

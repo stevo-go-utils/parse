@@ -21,18 +21,6 @@ func DefaultInnerHtmlOpts() *InnerHtmlOpts {
 	}
 }
 
-func InnerHtmlTagNameOpt(tagName string) InnerHtmlOptFunc {
-	return func(opts *InnerHtmlOpts) {
-		opts.tagName = tagName
-	}
-}
-
-func InnerHtmlAttrsOpt(attrs []html.Attribute) InnerHtmlOptFunc {
-	return func(opts *InnerHtmlOpts) {
-		opts.attrs = attrs
-	}
-}
-
 func InnerHtml(body string, attrKey string, opts ...InnerHtmlOptFunc) (innerHtml string, err error) {
 	defaultOpts := DefaultInnerHtmlOpts()
 	for _, opt := range opts {
