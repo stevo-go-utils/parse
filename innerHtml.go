@@ -24,13 +24,13 @@ func DefaultInnerHtmlOpts() *InnerHtmlOpts {
 	}
 }
 
-func InnerHtmlTagNameOpt(tagName string) InnerHtmlOpt {
+func TagNameInnerHtmlOpt(tagName string) InnerHtmlOpt {
 	return func(opts *InnerHtmlOpts) {
 		opts.tagName = tagName
 	}
 }
 
-func InnerHtmlAttrsOpt(attrs []html.Attribute) InnerHtmlOpt {
+func AttrsInnerHtmlOpt(attrs []html.Attribute) InnerHtmlOpt {
 	return func(opts *InnerHtmlOpts) {
 		opts.attrs = attrs
 	}
@@ -63,10 +63,10 @@ func InnerHtml(body string, opts ...InnerHtmlOpt) (innerHtml string, err error) 
 			return
 		case html.StartTagToken:
 			token := tkn.Token()
-			if !parseStartTag(token, defaultOpts.tagName, defaultOpts.attrs) {
+			if parseStartTag(token, defaultOpts.tagName, defaultOpts.attrs) {
+				checkText = true
 				continue
 			}
-			checkText = true
 		case html.TextToken:
 			if !checkText {
 				continue
