@@ -42,7 +42,7 @@ func parseAttrsVal(tkn *html.Tokenizer, attrKeys []string, opts *AttrValOpts) (v
 			return
 		case html.StartTagToken:
 			token := tkn.Token()
-			if !attrsValTokenCheck(token, opts) {
+			if !parseStartTag(token, opts.tagName, opts.attrs) {
 				continue
 			}
 			if opts.innerHtml != "" || opts.innerHtmlRegex != nil {
@@ -65,7 +65,7 @@ func parseAttrsVal(tkn *html.Tokenizer, attrKeys []string, opts *AttrValOpts) (v
 				continue
 			}
 			token := tkn.Token()
-			if !attrsValTextCheck(token, opts) {
+			if !parseTextTag(token, opts.innerHtml, opts.innerHtmlRegex) {
 				continue
 			}
 			if !HasAttributeKeys(token, attrKeys) {
@@ -82,24 +82,4 @@ func parseAttrsVal(tkn *html.Tokenizer, attrKeys []string, opts *AttrValOpts) (v
 		checkText = false
 		prevToken = nil
 	}
-}
-
-func attrsValTokenCheck(token html.Token, opts *AttrValOpts) bool {
-	if opts.tagName != "" && opts.tagName != token.Data {
-		return false
-	}
-	if opts.attrs != nil && !HasAttributes(token, opts.attrs) {
-		return false
-	}
-	return true
-}
-
-func attrsValTextCheck(token html.Token, opts *AttrValOpts) bool {
-	if opts.innerHtml != "" && token.Data != opts.innerHtml {
-		return false
-	}
-	if opts.innerHtmlRegex != nil && !opts.innerHtmlRegex.MatchString(token.Data) {
-		return false
-	}
-	return true
 }

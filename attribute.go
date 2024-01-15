@@ -24,25 +24,25 @@ func DefaultAttrValOpts() *AttrValOpts {
 	}
 }
 
-func AttrValTagNameOpt(tagName string) AttrValOpt {
+func TagNameAttrValOpt(tagName string) AttrValOpt {
 	return func(opts *AttrValOpts) {
 		opts.tagName = tagName
 	}
 }
 
-func AttrValAttrsOpt(attrs []html.Attribute) AttrValOpt {
+func AttrsAttrValOpt(attrs []html.Attribute) AttrValOpt {
 	return func(opts *AttrValOpts) {
 		opts.attrs = attrs
 	}
 }
 
-func InnerHtmlAttrOpt(innerHtml string) AttrValOpt {
+func InnerHtmlAttrValOpt(innerHtml string) AttrValOpt {
 	return func(opts *AttrValOpts) {
 		opts.innerHtml = innerHtml
 	}
 }
 
-func InnerHtmlRegexAttrOpt(innerHtmlRegex *regexp.Regexp) AttrValOpt {
+func InnerHtmlRegexAttrValOpt(innerHtmlRegex *regexp.Regexp) AttrValOpt {
 	return func(opts *AttrValOpts) {
 		opts.innerHtmlRegex = innerHtmlRegex
 	}
@@ -81,7 +81,7 @@ func parseAttrVal(tkn *html.Tokenizer, attrKey string, opts *AttrValOpts) (vals 
 			return
 		case html.StartTagToken:
 			token := tkn.Token()
-			if !attrValTokenCheck(token, opts) {
+			if !parseStartTag(token, opts.tagName, opts.attrs) {
 				continue
 			}
 			if opts.innerHtml != "" || opts.innerHtmlRegex != nil {
@@ -99,7 +99,7 @@ func parseAttrVal(tkn *html.Tokenizer, attrKey string, opts *AttrValOpts) (vals 
 				continue
 			}
 			token := tkn.Token()
-			if !attrValTextCheck(token, opts) {
+			if !parseTextTag(token, opts.innerHtml, opts.innerHtmlRegex) {
 				continue
 			}
 			for _, attr := range prevToken.Attr {
@@ -111,24 +111,4 @@ func parseAttrVal(tkn *html.Tokenizer, attrKey string, opts *AttrValOpts) (vals 
 		checkText = false
 		prevToken = nil
 	}
-}
-
-func attrValTokenCheck(token html.Token, opts *AttrValOpts) bool {
-	if opts.tagName != "" && opts.tagName != token.Data {
-		return false
-	}
-	if opts.attrs != nil && !HasAttributes(token, opts.attrs) {
-		return false
-	}
-	return true
-}
-
-func attrValTextCheck(token html.Token, opts *AttrValOpts) bool {
-	if opts.innerHtml != "" && token.Data != opts.innerHtml {
-		return false
-	}
-	if opts.innerHtmlRegex != nil && !opts.innerHtmlRegex.MatchString(token.Data) {
-		return false
-	}
-	return true
 }
