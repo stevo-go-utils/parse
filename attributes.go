@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-func AttrsVal(body string, attrKeys []string, opts ...AttrValOptFunc) (val map[string]string, err error) {
+func AttrsVal(body string, attrKeys []string, opts ...AttrValOpt) (val map[string]string, err error) {
 	defaultOpts := DefaultAttrValOpts()
 	for _, opt := range opts {
 		opt(defaultOpts)
@@ -22,7 +22,7 @@ func AttrsVal(body string, attrKeys []string, opts ...AttrValOptFunc) (val map[s
 	return
 }
 
-func AttrsVals(body string, attrKeys []string, opts ...AttrValOptFunc) (vals []map[string]string) {
+func AttrsVals(body string, attrKeys []string, opts ...AttrValOpt) (vals []map[string]string) {
 	defaultOpts := DefaultAttrValOpts()
 	for _, opt := range opts {
 		opt(defaultOpts)

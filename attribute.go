@@ -15,7 +15,7 @@ type AttrValOpts struct {
 	attrs          []html.Attribute
 }
 
-type AttrValOptFunc func(*AttrValOpts)
+type AttrValOpt func(*AttrValOpts)
 
 func DefaultAttrValOpts() *AttrValOpts {
 	return &AttrValOpts{
@@ -24,31 +24,31 @@ func DefaultAttrValOpts() *AttrValOpts {
 	}
 }
 
-func AttrValTagNameOpt(tagName string) AttrValOptFunc {
+func AttrValTagNameOpt(tagName string) AttrValOpt {
 	return func(opts *AttrValOpts) {
 		opts.tagName = tagName
 	}
 }
 
-func AttrValAttrsOpt(attrs []html.Attribute) AttrValOptFunc {
+func AttrValAttrsOpt(attrs []html.Attribute) AttrValOpt {
 	return func(opts *AttrValOpts) {
 		opts.attrs = attrs
 	}
 }
 
-func InnerHtmlAttrOpt(innerHtml string) AttrValOptFunc {
+func InnerHtmlAttrOpt(innerHtml string) AttrValOpt {
 	return func(opts *AttrValOpts) {
 		opts.innerHtml = innerHtml
 	}
 }
 
-func InnerHtmlRegexAttrOpt(innerHtmlRegex *regexp.Regexp) AttrValOptFunc {
+func InnerHtmlRegexAttrOpt(innerHtmlRegex *regexp.Regexp) AttrValOpt {
 	return func(opts *AttrValOpts) {
 		opts.innerHtmlRegex = innerHtmlRegex
 	}
 }
 
-func AttrVal(body string, attrKey string, opts ...AttrValOptFunc) (val string, err error) {
+func AttrVal(body string, attrKey string, opts ...AttrValOpt) (val string, err error) {
 	defaultOpts := DefaultAttrValOpts()
 	for _, opt := range opts {
 		opt(defaultOpts)
@@ -61,7 +61,7 @@ func AttrVal(body string, attrKey string, opts ...AttrValOptFunc) (val string, e
 	return
 }
 
-func AttrVals(body string, attrKey string, opts ...AttrValOptFunc) (vals []string) {
+func AttrVals(body string, attrKey string, opts ...AttrValOpt) (vals []string) {
 	defaultOpts := DefaultAttrValOpts()
 	for _, opt := range opts {
 		opt(defaultOpts)
