@@ -2,55 +2,15 @@ package parse
 
 import (
 	"fmt"
-	"regexp"
 	"slices"
 	"strings"
 
+	"github.com/stevo-go-utils/parse/opts/attributeOpts"
 	"golang.org/x/net/html"
 )
 
-type AttrValOpts struct {
-	tagName        string
-	innerHtml      string
-	innerHtmlRegex *regexp.Regexp
-	attrs          []html.Attribute
-}
-
-type AttrValOpt func(*AttrValOpts)
-
-func DefaultAttrValOpts() *AttrValOpts {
-	return &AttrValOpts{
-		tagName: "",
-		attrs:   nil,
-	}
-}
-
-func TagNameAttrValOpt(tagName string) AttrValOpt {
-	return func(opts *AttrValOpts) {
-		opts.tagName = tagName
-	}
-}
-
-func AttrsAttrValOpt(attrs []html.Attribute) AttrValOpt {
-	return func(opts *AttrValOpts) {
-		opts.attrs = attrs
-	}
-}
-
-func InnerHtmlAttrValOpt(innerHtml string) AttrValOpt {
-	return func(opts *AttrValOpts) {
-		opts.innerHtml = innerHtml
-	}
-}
-
-func InnerHtmlRegexAttrValOpt(innerHtmlRegex *regexp.Regexp) AttrValOpt {
-	return func(opts *AttrValOpts) {
-		opts.innerHtmlRegex = innerHtmlRegex
-	}
-}
-
-func AttrVal(body string, attrKey string, opts ...AttrValOpt) (val string, err error) {
-	defaultOpts := DefaultAttrValOpts()
+func AttrVal(body string, attrKey string, opts ...attributeOpts.Opt) (val string, err error) {
+	defaultOpts := attributeOpts.DefaultOpts()
 	for _, opt := range opts {
 		opt(defaultOpts)
 	}
@@ -62,15 +22,15 @@ func AttrVal(body string, attrKey string, opts ...AttrValOpt) (val string, err e
 	return
 }
 
-func AttrVals(body string, attrKey string, opts ...AttrValOpt) (vals []string) {
-	defaultOpts := DefaultAttrValOpts()
+func AttrVals(body string, attrKey string, opts ...attributeOpts.Opt) (vals []string) {
+	defaultOpts := attributeOpts.DefaultOpts()
 	for _, opt := range opts {
 		opt(defaultOpts)
 	}
 	return parseAttrVal(html.NewTokenizer(strings.NewReader(body)), attrKey, defaultOpts)
 }
 
-func parseAttrVal(tkn *html.Tokenizer, attrKey string, opts *AttrValOpts) (vals []string) {
+func parseAttrVal(tkn *html.Tokenizer, attrKey string, opts *attributeOpts.Opts) (vals []string) {
 	var (
 		prevToken *html.Token = nil
 		checkText bool        = false
@@ -82,10 +42,10 @@ func parseAttrVal(tkn *html.Tokenizer, attrKey string, opts *AttrValOpts) (vals 
 			return
 		case html.StartTagToken:
 			token := tkn.Token()
-			if !parseStartTag(token, opts.tagName, opts.attrs) {
+			if !parseStartTag(token, opts.TagName, opts.Attrs) {
 				continue
 			}
-			if opts.innerHtml != "" || opts.innerHtmlRegex != nil {
+			if opts.InnerHtml != "" || opts.InnerHtmlRegex != nil {
 				checkText = true
 				prevToken = &token
 				continue
@@ -100,7 +60,7 @@ func parseAttrVal(tkn *html.Tokenizer, attrKey string, opts *AttrValOpts) (vals 
 				continue
 			}
 			token := tkn.Token()
-			if !parseTextTag(token, opts.innerHtml, opts.innerHtmlRegex) {
+			if !parseTextTag(token, opts.InnerHtml, opts.InnerHtmlRegex) {
 				continue
 			}
 			for _, attr := range prevToken.Attr {
@@ -114,8 +74,8 @@ func parseAttrVal(tkn *html.Tokenizer, attrKey string, opts *AttrValOpts) (vals 
 	}
 }
 
-func AttrsVal(body string, attrKeys []string, opts ...AttrValOpt) (val map[string]string, err error) {
-	defaultOpts := DefaultAttrValOpts()
+func AttrsVal(body string, attrKeys []string, opts ...attributeOpts.Opt) (val map[string]string, err error) {
+	defaultOpts := attributeOpts.DefaultOpts()
 	for _, opt := range opts {
 		opt(defaultOpts)
 	}
@@ -128,15 +88,15 @@ func AttrsVal(body string, attrKeys []string, opts ...AttrValOpt) (val map[strin
 	return
 }
 
-func AttrsVals(body string, attrKeys []string, opts ...AttrValOpt) (vals []map[string]string) {
-	defaultOpts := DefaultAttrValOpts()
+func AttrsVals(body string, attrKeys []string, opts ...attributeOpts.Opt) (vals []map[string]string) {
+	defaultOpts := attributeOpts.DefaultOpts()
 	for _, opt := range opts {
 		opt(defaultOpts)
 	}
 	return parseAttrsVal(html.NewTokenizer(strings.NewReader(body)), attrKeys, defaultOpts)
 }
 
-func parseAttrsVal(tkn *html.Tokenizer, attrKeys []string, opts *AttrValOpts) (vals []map[string]string) {
+func parseAttrsVal(tkn *html.Tokenizer, attrKeys []string, opts *attributeOpts.Opts) (vals []map[string]string) {
 	var (
 		prevToken *html.Token = nil
 		checkText bool        = false
@@ -148,10 +108,10 @@ func parseAttrsVal(tkn *html.Tokenizer, attrKeys []string, opts *AttrValOpts) (v
 			return
 		case html.StartTagToken:
 			token := tkn.Token()
-			if !parseStartTag(token, opts.tagName, opts.attrs) {
+			if !parseStartTag(token, opts.TagName, opts.Attrs) {
 				continue
 			}
-			if opts.innerHtml != "" || opts.innerHtmlRegex != nil {
+			if opts.InnerHtml != "" || opts.InnerHtmlRegex != nil {
 				checkText = true
 				prevToken = &token
 				continue
@@ -171,7 +131,7 @@ func parseAttrsVal(tkn *html.Tokenizer, attrKeys []string, opts *AttrValOpts) (v
 				continue
 			}
 			token := tkn.Token()
-			if !parseTextTag(token, opts.innerHtml, opts.innerHtmlRegex) {
+			if !parseTextTag(token, opts.InnerHtml, opts.InnerHtmlRegex) {
 				continue
 			}
 			if !HasAttributeKeys(token, attrKeys) {

@@ -5,11 +5,12 @@ import (
 	"testing"
 
 	"github.com/stevo-go-utils/parse"
+	"github.com/stevo-go-utils/parse/opts/attributeOpts"
 )
 
 func TestAttrVal(t *testing.T) {
 	// find first <a> tag element with href attribute and return the href value
-	val, err := parse.AttrVal(htmlInput, "href", parse.TagNameAttrValOpt("a"))
+	val, err := parse.AttrVal(htmlInput, "href", attributeOpts.TagNameOpt("a"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,7 +21,7 @@ func TestAttrVal(t *testing.T) {
 
 func TestAttrVals(t *testing.T) {
 	// find all <a> tag elements with href attribute and return their href value
-	vals := parse.AttrVals(htmlInput, "href", parse.TagNameAttrValOpt("a"))
+	vals := parse.AttrVals(htmlInput, "href", attributeOpts.TagNameOpt("a"))
 	if len(vals) != 981 {
 		t.Fatalf("expected 981 urls, got %d", len(vals))
 	}
@@ -32,7 +33,7 @@ func TestAttrValOpts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	vals := parse.AttrVals(htmlInput, "href", parse.TagNameAttrValOpt("a"), parse.InnerHtmlRegexAttrValOpt(pattern))
+	vals := parse.AttrVals(htmlInput, "href", attributeOpts.TagNameOpt("a"), attributeOpts.InnerHtmlRegexOpt(pattern))
 	if len(vals) != 12 {
 		t.Fatalf("expected 12 urls, got %d", len(vals))
 	}
@@ -40,7 +41,7 @@ func TestAttrValOpts(t *testing.T) {
 
 func TestAttrsVal(t *testing.T) {
 	// find first <a> tag element with href attribute and return the href value
-	val, err := parse.AttrsVal(htmlInput, []string{"href", "class"}, parse.TagNameAttrValOpt("a"))
+	val, err := parse.AttrsVal(htmlInput, []string{"href", "class"}, attributeOpts.TagNameOpt("a"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +52,7 @@ func TestAttrsVal(t *testing.T) {
 
 func TestAttrsVals(t *testing.T) {
 	// find all <a> tag elements with href attribute and return their href value
-	vals := parse.AttrsVals(htmlInput, []string{"href", "class"}, parse.TagNameAttrValOpt("a"))
+	vals := parse.AttrsVals(htmlInput, []string{"href", "class"}, attributeOpts.TagNameOpt("a"))
 	if len(vals) != 245 {
 		t.Fatalf("expected 981 urls, got %d", len(vals))
 	}
@@ -63,7 +64,7 @@ func TestAttrsValOpts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	vals := parse.AttrVals(htmlInput, "href", parse.TagNameAttrValOpt("a"), parse.InnerHtmlRegexAttrValOpt(pattern))
+	vals := parse.AttrVals(htmlInput, "href", attributeOpts.TagNameOpt("a"), attributeOpts.InnerHtmlRegexOpt(pattern))
 	if len(vals) != 12 {
 		t.Fatalf("expected 12 urls, got %d", len(vals))
 	}
