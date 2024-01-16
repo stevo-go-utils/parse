@@ -2,6 +2,7 @@ package parse
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 
 	"github.com/andybalholm/cascadia"
@@ -10,8 +11,6 @@ import (
 
 type Node struct {
 	*html.Node
-	InnerHtml string
-	Children  []*Node
 }
 
 func Parse(body string) (node *Node, err error) {
@@ -21,31 +20,34 @@ func Parse(body string) (node *Node, err error) {
 		return
 	}
 	node = &Node{Node: n}
-	node.load()
 	return
 }
 
-func (node *Node) load() {
-	for child := node.FirstChild; child != nil; child = child.NextSibling {
-		n := &Node{Node: child}
-		n.load()
-		if child.Type == html.TextNode {
-			n.InnerHtml = child.Data
-		}
-		node.Children = append(node.Children, n)
-	}
-}
-
-func (node *Node) Query(query string) *Node {
+func (node *Node) Query(query string) (res *Node, err error) {
 	sel, err := cascadia.Parse(query)
 	if err != nil {
-		return node
+		err = errors.New("failed to parse query")
+		return
 	}
-	cascadia.Query(node.Node, sel)
+	htmlRes := cascadia.Query(node.Node, sel)
+	if htmlRes == nil {
+		err = errors.New("no results found")
+	}
+	res = &Node{Node: htmlRes}
+	return
 }
 
 func (node *Node) Render() string {
 	var buf bytes.Buffer
 	html.Render(&buf, node.Node)
 	return buf.String()
+}
+
+func (node *Node) InnerHtml() (innerHtml string) {
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		if c.Type == html.TextNode {
+			innerHtml = c.Data
+		}
+	}
+	return
 }
