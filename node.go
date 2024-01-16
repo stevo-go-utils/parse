@@ -81,3 +81,14 @@ func (node *Node) GetAttr(key string) (val string, has bool) {
 	}
 	return
 }
+
+// Given an attribute key (e.g. `class`) returns value of such attribute and defaults to an empty string
+func (node *Node) MustGetAttr(key string) (val string) {
+	for _, attr := range node.Attr {
+		if attr.Key == key {
+			val = attr.Val
+			return
+		}
+	}
+	return
+}

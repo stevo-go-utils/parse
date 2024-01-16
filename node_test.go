@@ -42,7 +42,6 @@ func TestQueryAll(t *testing.T) {
 		t.Error(fmt.Errorf("incorrect number of responses"))
 	}
 }
-
 func TestInnerHtml(t *testing.T) {
 	node, err := parse.Parse(htmlInput)
 	if err != nil {
@@ -54,5 +53,38 @@ func TestInnerHtml(t *testing.T) {
 	}
 	if res.InnerHtml() != "Pokémon" {
 		t.Error("wrong inner html")
+	}
+}
+
+func TestGetAttr(t *testing.T) {
+	node, err := parse.Parse(htmlInput)
+	if err != nil {
+		t.Error(err)
+	}
+	res, err := node.Query(`li[class="bg-global-nav-secondary-item header"]`)
+	if err != nil {
+		t.Error(err)
+	}
+	val, has := res.GetAttr("class")
+	if !has {
+		t.Error(fmt.Errorf("node does not have class attribute"))
+	}
+	if val != "bg-global-nav-secondary-item header" {
+		t.Error(fmt.Errorf("incorrect attribute value"))
+	}
+}
+
+func TestMustGetAttr(t *testing.T) {
+	node, err := parse.Parse(htmlInput)
+	if err != nil {
+		t.Error(err)
+	}
+	res, err := node.Query(`li[class="bg-global-nav-secondary-item header"]`)
+	if err != nil {
+		t.Error(err)
+	}
+	val := res.MustGetAttr("id")
+	if val != "" {
+		t.Error(fmt.Errorf("incorrect attribute value"))
 	}
 }
