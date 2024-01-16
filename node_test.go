@@ -1,6 +1,7 @@
 package parse_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stevo-go-utils/parse"
@@ -25,6 +26,20 @@ func TestQuery(t *testing.T) {
 	}
 	if res.Render() != `<li class="bg-global-nav-secondary-item header">Pokémon</li>` {
 		t.Error("wrong node")
+	}
+}
+
+func TestQueryAll(t *testing.T) {
+	node, err := parse.Parse(htmlInput)
+	if err != nil {
+		t.Error(err)
+	}
+	res, err := node.QueryAll(`a[href="https://bulbagarden.net"]`)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(res) != 2 {
+		t.Error(fmt.Errorf("incorrect number of responses"))
 	}
 }
 
