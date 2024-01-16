@@ -2,55 +2,15 @@ package parse
 
 import (
 	"errors"
-	"regexp"
 	"strings"
 
+	"github.com/stevo-go-utils/parse/opts/innerhtmlOpts"
 	"golang.org/x/net/html"
 )
 
-type InnerHtmlOpts struct {
-	tagName        string
-	innerHtml      string
-	innerHtmlRegex *regexp.Regexp
-	attrs          []html.Attribute
-}
-
-type InnerHtmlOpt func(*InnerHtmlOpts)
-
-func DefaultInnerHtmlOpts() *InnerHtmlOpts {
-	return &InnerHtmlOpts{
-		tagName: "",
-		attrs:   nil,
-	}
-}
-
-func TagNameInnerHtmlOpt(tagName string) InnerHtmlOpt {
-	return func(opts *InnerHtmlOpts) {
-		opts.tagName = tagName
-	}
-}
-
-func AttrsInnerHtmlOpt(attrs []html.Attribute) InnerHtmlOpt {
-	return func(opts *InnerHtmlOpts) {
-		opts.attrs = attrs
-	}
-}
-
-func InnerHtmlInnerHtmlOpt(innerHtml string) InnerHtmlOpt {
-	return func(opts *InnerHtmlOpts) {
-		opts.innerHtml = innerHtml
-	}
-}
-
-func InnerHtmlRegexInnerHtmlOpt(innerHtmlRegex *regexp.Regexp) InnerHtmlOpt {
-	return func(opts *InnerHtmlOpts) {
-		opts.innerHtmlRegex = innerHtmlRegex
-	}
-}
-
-func InnerHtml(body string, opts ...InnerHtmlOpt) (innerHtml string, err error) {
+func InnerHtml(body string, opts ...innerhtmlOpts.Opt) (innerHtml string, err error) {
 	var checkText bool = false
-	defaultOpts := DefaultInnerHtmlOpts()
+	defaultOpts := innerhtmlOpts.DefaultOpts()
 	for _, opt := range opts {
 		opt(defaultOpts)
 	}
@@ -63,7 +23,7 @@ func InnerHtml(body string, opts ...InnerHtmlOpt) (innerHtml string, err error) 
 			return
 		case html.StartTagToken:
 			token := tkn.Token()
-			if parseStartTag(token, defaultOpts.tagName, defaultOpts.attrs) {
+			if parseStartTag(token, defaultOpts.TagName, defaultOpts.Attrs) {
 				checkText = true
 				continue
 			}
@@ -72,7 +32,41 @@ func InnerHtml(body string, opts ...InnerHtmlOpt) (innerHtml string, err error) 
 				continue
 			}
 			token := tkn.Token()
-			if !parseTextTag(token, defaultOpts.innerHtml, defaultOpts.innerHtmlRegex) {
+			if !parseTextTag(token, defaultOpts.InnerHtml, defaultOpts.InnerHtmlRegex) {
+				continue
+			}
+			innerHtml = token.Data
+			return
+		}
+		checkText = false
+	}
+}
+
+func InnerHtmls(body string, opts ...innerhtmlOpts.Opt) (innerHtml string, err error) {
+	var checkText bool = false
+	defaultOpts := innerhtmlOpts.DefaultOpts()
+	for _, opt := range opts {
+		opt(defaultOpts)
+	}
+	tkn := html.NewTokenizer(strings.NewReader(body))
+	for {
+		tt := tkn.Next()
+		switch tt {
+		case html.ErrorToken:
+			err = errors.New("no inner html found")
+			return
+		case html.StartTagToken:
+			token := tkn.Token()
+			if parseStartTag(token, defaultOpts.TagName, defaultOpts.Attrs) {
+				checkText = true
+				continue
+			}
+		case html.TextToken:
+			if !checkText {
+				continue
+			}
+			token := tkn.Token()
+			if !parseTextTag(token, defaultOpts.InnerHtml, defaultOpts.InnerHtmlRegex) {
 				continue
 			}
 			innerHtml = token.Data
