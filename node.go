@@ -41,7 +41,7 @@ func (node *Node) Body() (res *Node) {
 }
 
 // Render the node and its children as html
-func (node *Node) Render() string {
+func (node *Node) Render() (res string) {
 	var buf bytes.Buffer
 	html.Render(&buf, node.Node)
 	return buf.String()
