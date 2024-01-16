@@ -15,18 +15,8 @@ func TestParse(t *testing.T) {
 	_ = node
 }
 
-func TestParseWithUseHtmlWrapper(t *testing.T) {
-	node, err := parse.Parse(htmlInput2, true)
-	if err != nil {
-		t.Error(err)
-	}
-	if node.RenderWithSiblings() != htmlInput2 {
-		t.Error(fmt.Errorf("incorrect rendering"))
-	}
-}
-
 func TestBody(t *testing.T) {
-	node, err := parse.Parse(htmlInput2, true)
+	node, err := parse.Parse(htmlInput2)
 	if err != nil {
 		t.Error(err)
 	}

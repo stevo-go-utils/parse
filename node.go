@@ -13,29 +13,17 @@ type Node struct {
 	*html.Node
 }
 
+// Creates a Node from a node from the built-in html package
+func NewNode(htmlNode *html.Node) *Node {
+	return &Node{Node: htmlNode}
+}
+
 // Enter an html valid body and convert it to Node tree for further functionality.
-func Parse(body string, useHtmlWrapper ...bool) (node *Node, err error) {
+func Parse(body string) (node *Node, err error) {
 	var n *html.Node
-	if len(useHtmlWrapper) == 1 && useHtmlWrapper[0] {
-		body = `<div id="parse-html-wrapper">` + body + `</div>`
-	}
 	n, err = html.Parse(strings.NewReader(body))
 	if err != nil {
 		return
-	}
-	if len(useHtmlWrapper) == 1 && useHtmlWrapper[0] {
-		var sel cascadia.Matcher
-		sel, err = cascadia.Parse(`div[id="parse-html-wrapper"]`)
-		if err != nil {
-			err = errors.New("failed to parse html wrapper matcher")
-			return
-		}
-		n = cascadia.Query(n, sel)
-		if n == nil {
-			err = errors.New("failed to find html wrapper node")
-			return
-		}
-		n = n.FirstChild
 	}
 	node = &Node{Node: n}
 	return
@@ -45,9 +33,10 @@ func Parse(body string, useHtmlWrapper ...bool) (node *Node, err error) {
 func (node *Node) Body() (res *Node) {
 	var err error
 	res, err = node.Query("body")
-	if err != nil {
+	if err != nil || res == nil || res.FirstChild == nil {
 		res = node
 	}
+	res = NewNode(res.FirstChild)
 	return
 }
 
