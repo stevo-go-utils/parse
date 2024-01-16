@@ -5,7 +5,11 @@ import (
 	"os"
 )
 
-var htmlInput string
+var (
+	htmlInput  string
+	htmlInput2 string = `<div>Foo</div><p>Bar</p>`
+	htmlInput3 string = `<div>Foo</div>`
+)
 
 func init() {
 	data, err := os.ReadFile("./axew.html")

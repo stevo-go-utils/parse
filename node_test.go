@@ -7,12 +7,32 @@ import (
 	"github.com/stevo-go-utils/parse"
 )
 
-func TestNode(t *testing.T) {
+func TestParse(t *testing.T) {
 	node, err := parse.Parse(htmlInput)
 	if err != nil {
 		t.Error(err)
 	}
 	_ = node
+}
+
+func TestParseWithUseHtmlWrapper(t *testing.T) {
+	node, err := parse.Parse(htmlInput2, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if node.RenderWithSiblings() != htmlInput2 {
+		t.Error(fmt.Errorf("incorrect rendering"))
+	}
+}
+
+func TestBody(t *testing.T) {
+	node, err := parse.Parse(htmlInput2, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if node.Body().RenderWithSiblings() != htmlInput2 {
+		t.Error(fmt.Errorf("incorrect rendering"))
+	}
 }
 
 func TestQuery(t *testing.T) {
